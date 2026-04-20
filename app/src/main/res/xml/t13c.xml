@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
+    android:keyWidth="16.66%p"
+    android:horizontalGap="0px"
+    android:verticalGap="0px"
+    android:keyHeight="60dp">
+
+    <Row>
+        <Key android:keyWidth="10%p" android:codes="49" android:keyLabel="1" />
+        <Key android:keyWidth="10%p" android:codes="50" android:keyLabel="2" />
+        <Key android:keyWidth="10%p" android:codes="51" android:keyLabel="3" />
+        <Key android:keyWidth="10%p" android:codes="52" android:keyLabel="4" />
+        <Key android:keyWidth="10%p" android:codes="53" android:keyLabel="5" />
+        <Key android:keyWidth="10%p" android:codes="54" android:keyLabel="6" />
+        <Key android:keyWidth="10%p" android:codes="55" android:keyLabel="7" />
+        <Key android:keyWidth="10%p" android:codes="56" android:keyLabel="8" />
+        <Key android:keyWidth="10%p" android:codes="57" android:keyLabel="9" />
+        <Key android:keyWidth="10%p" android:codes="48" android:keyLabel="0" />
+    </Row>
+
+    <!-- Row 1: qw er ty ui op -->
+    <Row>
+        <Key android:keyWidth="20%p" android:codes="113,119" android:keyLabel="手田" />
+        <Key android:keyWidth="20%p" android:codes="101,114" android:keyLabel="水口" />
+        <Key android:keyWidth="20%p" android:codes="116,121" android:keyLabel="廿卜" />
+        <Key android:keyWidth="20%p" android:codes="117,105" android:keyLabel="山戈" />
+        <Key android:keyWidth="20%p" android:codes="111,112" android:keyLabel="人心" />
+    </Row>
+    <!-- Row 2: as df gh jk l -->
+    <Row>
+        <Key android:keyWidth="20%p" android:codes="97,115" android:keyLabel="日尸" />
+        <Key android:keyWidth="20%p" android:codes="100,102" android:keyLabel="木火" />
+        <Key android:keyWidth="20%p" android:codes="103,104" android:keyLabel="土竹" />
+        <Key android:keyWidth="20%p" android:codes="106,107" android:keyLabel="十大" />
+        <Key android:keyWidth="20%p" android:codes="108" android:keyLabel="中" />
+    </Row>
+    <!-- Row 3: zx cv bn m -->
+    <Row>
+        <Key android:keyWidth="20%p" android:codes="122,120" android:keyLabel="難" />
+        <Key android:keyWidth="20%p" android:codes="99,118" android:keyLabel="金女" />
+        <Key android:keyWidth="20%p" android:codes="98,110" android:keyLabel="月弓" />
+        <Key android:keyWidth="20%p" android:codes="109" android:keyLabel="一" />
+
+        <Key android:keyWidth="20%p" android:codes="-5" android:keyLabel="⌫" />
+    </Row>
+    <!-- Row 4: symbols, shift, 0, enter, etc. -->
+    <Row>
+        <Key android:keyWidth="10%p" android:codes="-106" android:keyLabel="🌐" />
+        <Key android:keyWidth="10%p" android:codes="-105" android:keyLabel="!#$" />
+        <Key android:keyWidth="10%p" android:codes="44" android:keyLabel="," />
+        <Key android:keyWidth="10%p" android:codes="46" android:keyLabel="." />
+        <Key android:keyWidth="40%p" android:codes="32" android:keyLabel="␣" />
+<!--        <Key android:keyWidth="10%p" android:codes="-7" android:keyLabel="速✗" />-->
+        <Key android:keyWidth="20%p" android:codes="-4" android:keyLabel="⏎" />
+    </Row>
+</Keyboard>

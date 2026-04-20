@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/navigation_home">
+
+    <fragment
+        android:id="@+id/navigation_home"
+        android:name="com.mtedwin.ekeyboard.HomePage"
+        android:label="Home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/navigation_edit_eng"
+        android:name="com.mtedwin.ekeyboard.EditEngListPage"
+        android:label="Edit English"
+        tools:layout="@layout/fragment_edit_eng" />
+
+    <fragment
+        android:id="@+id/navigation_edit_chi"
+        android:name="com.mtedwin.ekeyboard.EditChiListPage"
+        android:label="Edit Chinese"
+        tools:layout="@layout/fragment_edit_chi" />
+
+</navigation>
+

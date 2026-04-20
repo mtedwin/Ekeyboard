@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Keyboard xmlns:android="http://schemas.android.com/apk/res/android"
+    android:keyWidth="10%p"
+    android:horizontalGap="0px"
+    android:verticalGap="0px"
+    android:keyHeight="60dp">
+    <Row>
+        <Key android:keyWidth="10%p" android:codes="49" android:keyLabel="1" />
+        <Key android:keyWidth="10%p" android:codes="50" android:keyLabel="2" />
+        <Key android:keyWidth="10%p" android:codes="51" android:keyLabel="3" />
+        <Key android:keyWidth="10%p" android:codes="52" android:keyLabel="4" />
+        <Key android:keyWidth="10%p" android:codes="53" android:keyLabel="5" />
+        <Key android:keyWidth="10%p" android:codes="54" android:keyLabel="6" />
+        <Key android:keyWidth="10%p" android:codes="55" android:keyLabel="7" />
+        <Key android:keyWidth="10%p" android:codes="56" android:keyLabel="8" />
+        <Key android:keyWidth="10%p" android:codes="57" android:keyLabel="9" />
+        <Key android:keyWidth="10%p" android:codes="48" android:keyLabel="0" />
+    </Row>
+    <Row>
+        <Key android:codes="113" android:keyLabel="手" />  <!-- Q -->
+        <Key android:codes="119" android:keyLabel="田" />  <!-- W -->
+        <Key android:codes="101" android:keyLabel="水" />  <!-- E -->
+        <Key android:codes="114" android:keyLabel="口" />  <!-- R -->
+        <Key android:codes="116" android:keyLabel="廿" />  <!-- T -->
+        <Key android:codes="121" android:keyLabel="卜" />  <!-- Y -->
+        <Key android:codes="117" android:keyLabel="山" />  <!-- U -->
+        <Key android:codes="105" android:keyLabel="戈" />  <!-- I -->
+        <Key android:codes="111" android:keyLabel="人" />  <!-- O -->
+        <Key android:codes="112" android:keyLabel="心" />  <!-- P -->
+    </Row>
+    <Row>
+        <Key android:keyWidth="5%p" android:codes="0" android:keyLabel="" android:isModifier="false" />
+        <Key android:codes="97"  android:keyLabel="日" />   <!-- A -->
+        <Key android:codes="115" android:keyLabel="尸" />   <!-- S -->
+        <Key android:codes="100" android:keyLabel="木" />   <!-- D -->
+        <Key android:codes="102" android:keyLabel="火" />   <!-- F -->
+        <Key android:codes="103" android:keyLabel="土" />   <!-- G -->
+        <Key android:codes="104" android:keyLabel="竹" />   <!-- H -->
+        <Key android:codes="106" android:keyLabel="十" />   <!-- J -->
+        <Key android:codes="107" android:keyLabel="大" />   <!-- K -->
+        <Key android:codes="108" android:keyLabel="中" />   <!-- L -->
+        <Key android:keyWidth="5%p" android:codes="0" android:keyLabel="" android:isModifier="false" />
+    </Row>
+    <Row>
+        <Key android:keyWidth="5%p" android:codes="0" android:keyLabel="" android:isModifier="false" />
+        <Key android:codes="122" android:keyLabel="重" />   <!-- Z -->
+        <Key android:codes="120" android:keyLabel="難" />   <!-- X -->
+        <Key android:codes="99"  android:keyLabel="金" />   <!-- C -->
+        <Key android:codes="118" android:keyLabel="女" />   <!-- V -->
+        <Key android:codes="98"  android:keyLabel="月" />   <!-- B -->
+        <Key android:codes="110" android:keyLabel="弓" />   <!-- N -->
+        <Key android:codes="109" android:keyLabel="一" />   <!-- M -->
+        <Key android:keyWidth="20%p" android:codes="-5" android:keyLabel="⌫" />
+        <Key android:keyWidth="5%p" android:codes="0" android:keyLabel="" android:isModifier="false" />
+    </Row>
+    <Row>
+        <Key android:keyWidth="10%p" android:codes="-106" android:keyLabel="🌐" />
+        <Key android:keyWidth="10%p" android:codes="-105" android:keyLabel="!#$" />
+        <Key android:keyWidth="10%p" android:codes="44" android:keyLabel="," />
+        <Key android:keyWidth="10%p" android:codes="46" android:keyLabel="." />
+        <Key android:keyWidth="30%p" android:codes="32" android:keyLabel="␣" />
+        <Key android:keyWidth="10%p" android:codes="-7" android:keyLabel="速✗" />
+        <Key android:keyWidth="20%p" android:codes="-4" android:keyLabel="⏎" />
+    </Row>
+</Keyboard>

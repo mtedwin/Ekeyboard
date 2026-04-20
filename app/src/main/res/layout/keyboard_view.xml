@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <HorizontalScrollView
+        android:id="@+id/prediction_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+    <LinearLayout
+        android:id="@+id/prediction_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:orientation="horizontal"
+        android:background="#DDDDDD"
+        android:visibility="gone">  <!-- Initially hidden -->
+
+        <TextView android:id="@+id/prediction1"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"/>
+        <TextView android:id="@+id/prediction2"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"/>
+        <TextView android:id="@+id/prediction3"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"/>
+        <TextView android:id="@+id/prediction4"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"
+            android:visibility="gone"/>
+        <TextView android:id="@+id/prediction5"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"
+            android:visibility="gone"/>
+        <TextView android:id="@+id/prediction6"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"
+            android:visibility="gone"/>
+        <TextView android:id="@+id/prediction7"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"
+            android:visibility="gone"/>
+        <TextView android:id="@+id/prediction8"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"
+            android:visibility="gone"/>
+        <TextView android:id="@+id/prediction9"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"
+            android:visibility="gone"/>
+        <TextView android:id="@+id/prediction10"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center" android:textSize="16sp"
+            android:clickable="true" android:focusable="true"
+            android:paddingLeft="12dp" android:paddingRight="12dp"
+            android:minWidth="60dp"
+            android:maxWidth="200dp"
+            android:visibility="gone"/>
+
+
+    </LinearLayout>
+
+    </HorizontalScrollView>
+
+
+
+    <com.mtedwin.ekeyboard.NoDoubleTapKeyboardView
+        android:id="@+id/keyboard_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
