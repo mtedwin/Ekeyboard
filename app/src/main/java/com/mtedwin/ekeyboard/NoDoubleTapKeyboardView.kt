@@ -52,6 +52,8 @@ class NoDoubleTapKeyboardView constructor(
 
     var onKeyLongPressListener: NoDoubleTapKeyboardView.OnKeyLongPressListener? = null
 
+    private var activeLongPressCode: Int? = null
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!bypassTouchHandling) {
             return super.onTouchEvent(event)
@@ -63,16 +65,14 @@ class NoDoubleTapKeyboardView constructor(
                 downKeyIndex = keyIndex
                 Log.d(TAG, "BYPASS ACTION_DOWN keyIndex=$keyIndex")
 
-                // Highlight the key visually
                 if (keyIndex >= 0) {
                     invalidateKey(keyIndex)
 
-                    // Start long press detection
                     longPressJob = CoroutineScope(Dispatchers.Main).launch {
                         delay(longPressTimeout)
                         if (isActive && downKeyIndex == keyIndex) {
-                            val key = keyboard?.keys?.get(keyIndex)
-                            if (key != null) {
+                            keyboard?.keys?.get(keyIndex)?.let { key ->
+                                activeLongPressCode = key.codes[0] // Track key code for long-press
                                 onLongPress(key)
                             }
                         }
@@ -82,9 +82,13 @@ class NoDoubleTapKeyboardView constructor(
             }
 
             MotionEvent.ACTION_MOVE -> {
-                // Track finger movement — update key if moved to different key
                 val keyIndex = getKeyIndexAt(event.x.toInt(), event.y.toInt())
                 if (keyIndex != downKeyIndex) {
+                    // Release active long-press if finger slides to another key
+                    activeLongPressCode?.let { code ->
+                        onKeyLongPressListener?.onKeyReleased(code)
+                        activeLongPressCode = null
+                    }
                     longPressJob?.cancel()
                     longPressJob = null
                     downKeyIndex = keyIndex
@@ -93,20 +97,23 @@ class NoDoubleTapKeyboardView constructor(
             }
 
             MotionEvent.ACTION_UP -> {
-                // Cancel long press
                 longPressJob?.cancel()
                 longPressJob = null
 
+                // Release active long-press state when finger lifts up
+                activeLongPressCode?.let { code ->
+                    onKeyLongPressListener?.onKeyReleased(code)
+                    activeLongPressCode = null
+                }
+
                 val keyIndex = downKeyIndex
                 downKeyIndex = -1
-                Log.d(TAG, "BYPASS ACTION_UP keyIndex=$keyIndex")
 
                 if (keyIndex >= 0) {
                     val keys = keyboard?.keys
                     if (keys != null && keyIndex in keys.indices) {
                         val key = keys[keyIndex]
                         Log.d(TAG, "BYPASS firing onKey code=${key.codes[0]}")
-                        onKeyLongPressListener?.onKeyReleased(key.codes[0]) // Add this line
                         onKeyboardActionListener?.onKey(key.codes[0], key.codes)
                     }
                 }
@@ -114,25 +121,21 @@ class NoDoubleTapKeyboardView constructor(
             }
 
             MotionEvent.ACTION_CANCEL -> {
-
                 longPressJob?.cancel()
                 longPressJob = null
-                val keyIndex = downKeyIndex
-                downKeyIndex = -1
-                if (keyIndex >= 0) {
-                    val keys = keyboard?.keys
-                    if (keys != null && keyIndex in keys.indices) {
-                        onKeyLongPressListener?.onKeyReleased(keys[keyIndex].codes[0]) // Add this
-                    }
+
+                activeLongPressCode?.let { code ->
+                    onKeyLongPressListener?.onKeyReleased(code)
+                    activeLongPressCode = null
                 }
+
+                downKeyIndex = -1
                 return true
             }
         }
 
         return super.onTouchEvent(event)
     }
-
-
 
     override fun onLongPress(key: Keyboard.Key): Boolean {
         Log.d(TAG, "Long press on key: ${key.codes[0]}")

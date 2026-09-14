@@ -669,6 +669,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
                 }
             }
             -5 -> { // Backspace
+
                 if (currentKeyGroups.isNotEmpty()) {
                     currentKeyGroups.removeAt(currentKeyGroups.size - 1)
                     if ((isChinese || isT13C) && currentChinesePinyinLength > 0) {
