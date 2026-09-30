@@ -1,5 +1,6 @@
 package com.mtedwin.ekeyboard
 
+import androidx.fragment.app.Fragment
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +11,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
-import androidx.fragment.app.Fragment
+import androidx.core.content.ContentProviderCompat.requireContext
 import kotlin.div
 
 class EditChiListPage : Fragment() {

@@ -45,7 +45,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     private lateinit var prediction4: TextView
     private lateinit var prediction5: TextView
     private lateinit var prediction6: TextView
-
     private lateinit var prediction7: TextView
     private lateinit var prediction8: TextView
     private lateinit var prediction9: TextView
@@ -55,7 +54,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var predictionJob: Job? = null
     private var isChinese: Boolean = false
-
     private var isQuickChi : Boolean = false
     private var isT13C: Boolean = false
     private var isSymbol: Boolean = false
