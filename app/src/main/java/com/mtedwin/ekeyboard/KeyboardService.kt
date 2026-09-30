@@ -54,7 +54,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var predictionJob: Job? = null
     private var isChinese: Boolean = false
-    private var isQuickChi : Boolean = false
+    private var isQuickChi : Boolean = true
     private var isT13C: Boolean = false
     private var isSymbol: Boolean = false
     private var chineseDictionary: Map<String, List<String>> = emptyMap()
@@ -119,6 +119,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             }
         )
         keyboardView.keyboard = keyboard
+        updateQuickChiKeyLabel()
         keyboardView.setOnKeyboardActionListener(this)
         keyboardView.isPreviewEnabled = false
         keyboardView.bypassTouchHandling = isT13 || isT13C
@@ -627,6 +628,78 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
         }
     }
 
+    private fun updateQuickChiKeyLabel() {
+        if (!::keyboardView.isInitialized) return
+        keyboard.keys.find { it.codes.contains(-7) }?.let { quickChiKey ->
+            quickChiKey.label = if (isQuickChi) "速✔" else "速✗"
+            keyboardView.invalidateAllKeys()
+        }
+    }
+
+    private fun getUserCycleOrder(): List<String> {
+        val defaultOrder = listOf("qwerty", "t13", "chinese", "t13c")
+        val rawOrder = getSharedPreferences("KeyboardSettings", MODE_PRIVATE)
+            .getString("keyboardCycleOrder", defaultOrder.joinToString(","))
+            ?: defaultOrder.joinToString(",")
+
+        val allowed = setOf("qwerty", "t13", "chinese", "t13c")
+        return rawOrder
+            .split(",")
+            .map { it.trim().lowercase() }
+            .filter { it in allowed }
+            .distinct()
+            .ifEmpty { defaultOrder }
+    }
+
+    private fun applyKeyboardLayout(layoutName: String) {
+        when (layoutName) {
+            "qwerty" -> {
+                keyboard = Keyboard(this, R.xml.qwerty)
+                isT13 = false
+                isChinese = false
+                isT13C = false
+                isSymbol = false
+            }
+            "t13" -> {
+                keyboard = Keyboard(this, R.xml.t13)
+                isT13 = true
+                isChinese = false
+                isT13C = false
+                isSymbol = false
+            }
+            "chinese" -> {
+                keyboard = Keyboard(this, R.xml.chinese_full)
+                isChinese = true
+                isT13 = false
+                isT13C = false
+                isSymbol = false
+            }
+            "t13c" -> {
+                keyboard = Keyboard(this, R.xml.t13c)
+                isT13C = true
+                isT13 = false
+                isChinese = false
+                isSymbol = false
+            }
+            else -> return
+        }
+
+        keyboardView.keyboard = keyboard
+        keyboardView.bypassTouchHandling = true
+        updateQuickChiKeyLabel()
+        resetSequence()
+    }
+
+    private fun getCurrentKeyboardName(): String {
+        return when {
+            isT13 -> "t13"
+            isChinese -> "chinese"
+            isT13C -> "t13c"
+            isSymbol -> "symbol"
+            else -> "qwerty"
+        }
+    }
+
     private fun handleBackspace() {
         val ic = currentInputConnection ?: return
         ic.deleteSurroundingText(1, 0)
@@ -659,12 +732,8 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
                 ic.commitText(primaryCode.toChar().toString(), 1)
             }
             -7 -> {
-                isQuickChi = !isQuickChi
-                // Find the key with code -7 and update its label
-                keyboard.keys.find { it.codes.contains(-7) }?.let { quickChiKey ->
-                    quickChiKey.label = if (isQuickChi) "速✔" else "速✗"
-                    keyboardView.invalidateAllKeys()
-                }
+               isQuickChi = !isQuickChi
+               updateQuickChiKeyLabel()
             }
             -5 -> { // Backspace
 
@@ -757,6 +826,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
                 isT13C = false
                 isSymbol = false
                 keyboardView.bypassTouchHandling = true
+                updateQuickChiKeyLabel()
                 resetSequence()
 
             }
@@ -768,6 +838,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
                 isT13C = false
                 isSymbol = false
                 keyboardView.bypassTouchHandling = true
+                updateQuickChiKeyLabel()
                 resetSequence()
 
             }
@@ -779,6 +850,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
                 isT13C = false
                 isSymbol = false
                 keyboardView.bypassTouchHandling = true
+                updateQuickChiKeyLabel()
                 resetSequence()
             }
             -104 -> { // T13C layout - combines T13 key grouping with Chinese dictionary
@@ -789,6 +861,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
                 isChinese = false
                 isSymbol = false
                 keyboardView.bypassTouchHandling = true
+                updateQuickChiKeyLabel()
                 resetSequence()
             }
             -105 -> { // Symbol keyboard
@@ -799,55 +872,15 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
                 isT13C = false
                 isChinese = false
                 keyboardView.bypassTouchHandling = true
+                updateQuickChiKeyLabel()
                 resetSequence()
             }
-            -106 -> { // Cycle through app keyboards: QWERTY → T13 → Chinese Full → T13C → QWERTY
-                when {
-                    !isT13 && !isChinese && !isT13C && !isSymbol -> {
-                        // Currently QWERTY → Switch to T13
-                        keyboard = Keyboard(this, R.xml.t13)
-                        keyboardView.keyboard = keyboard
-                        isT13 = true
-                        isChinese = false
-                        isT13C = false
-                        isSymbol = false
-                        keyboardView.bypassTouchHandling = true
-                        resetSequence()
-                    }
-                    isT13 -> {
-                        // Currently T13 → Switch to Chinese Full
-                        keyboard = Keyboard(this, R.xml.chinese_full)
-                        keyboardView.keyboard = keyboard
-                        isChinese = true
-                        isT13 = false
-                        isT13C = false
-                        isSymbol = false
-                        keyboardView.bypassTouchHandling = true
-                        resetSequence()
-                    }
-                    isChinese -> {
-                        // Currently Chinese Full → Switch to T13C
-                        keyboard = Keyboard(this, R.xml.t13c)
-                        keyboardView.keyboard = keyboard
-                        isT13C = true
-                        isT13 = false
-                        isChinese = false
-                        isSymbol = false
-                        keyboardView.bypassTouchHandling = true
-                        resetSequence()
-                    }
-                    isT13C -> {
-                        // Currently T13C → Switch to QWERTY
-                        keyboard = Keyboard(this, R.xml.qwerty)
-                        keyboardView.keyboard = keyboard
-                        isT13 = false
-                        isChinese = false
-                        isT13C = false
-                        isSymbol = false
-                        keyboardView.bypassTouchHandling = true
-                        resetSequence()
-                    }
-                }
+            -106 -> { // Cycle through user-selected app keyboards in the configured order
+                val cycleOrder = getUserCycleOrder()
+                val currentName = getCurrentKeyboardName()
+                val currentIndex = cycleOrder.indexOf(currentName)
+                val nextIndex = if (currentIndex >= 0) (currentIndex + 1) % cycleOrder.size else 0
+                applyKeyboardLayout(cycleOrder[nextIndex])
             }
             else -> {
                 if (isT13) {

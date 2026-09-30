@@ -61,6 +61,7 @@ class NoDoubleTapKeyboardView constructor(
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                activeLongPressCode = null
                 val keyIndex = getKeyIndexAt(event.x.toInt(), event.y.toInt())
                 downKeyIndex = keyIndex
                 Log.d(TAG, "BYPASS ACTION_DOWN keyIndex=$keyIndex")
@@ -100,6 +101,7 @@ class NoDoubleTapKeyboardView constructor(
                 longPressJob?.cancel()
                 longPressJob = null
 
+                val wasLongPressed = activeLongPressCode != null
                 // Release active long-press state when finger lifts up
                 activeLongPressCode?.let { code ->
                     onKeyLongPressListener?.onKeyReleased(code)
@@ -108,6 +110,11 @@ class NoDoubleTapKeyboardView constructor(
 
                 val keyIndex = downKeyIndex
                 downKeyIndex = -1
+
+                if (wasLongPressed) {
+                    Log.d(TAG, "BYPASS suppressing tap after long press")
+                    return true
+                }
 
                 if (keyIndex >= 0) {
                     val keys = keyboard?.keys

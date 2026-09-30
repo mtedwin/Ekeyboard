@@ -81,13 +81,72 @@
             android:layout_marginTop="16dp" />
 
         <TextView
+            android:id="@+id/keyboardCycleSettingsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Keyboard Cycle Settings"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintTop_toBottomOf="@id/instructionTextView"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="32dp" />
+
+        <CheckBox
+            android:id="@+id/qwertyCycleCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="QWERTY"
+            android:checked="true"
+            app:layout_constraintTop_toBottomOf="@id/keyboardCycleSettingsLabel"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <CheckBox
+            android:id="@+id/t13CycleCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="T13"
+            android:checked="true"
+            app:layout_constraintTop_toBottomOf="@id/qwertyCycleCheckBox"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <CheckBox
+            android:id="@+id/chineseCycleCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chinese"
+            android:checked="true"
+            app:layout_constraintTop_toBottomOf="@id/t13CycleCheckBox"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <CheckBox
+            android:id="@+id/t13cCycleCheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="T13C"
+            android:checked="true"
+            app:layout_constraintTop_toBottomOf="@id/chineseCycleCheckBox"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <EditText
+            android:id="@+id/keyboardCycleOrderEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Order: qwerty,t13,chinese,t13c"
+            android:inputType="text"
+            app:layout_constraintTop_toBottomOf="@id/t13cCycleCheckBox"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="8dp" />
+
+        <TextView
             android:id="@+id/t13SettingsLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="T13 Keyboard Settings"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintTop_toBottomOf="@id/instructionTextView"
+            app:layout_constraintTop_toBottomOf="@id/keyboardCycleOrderEditText"
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginTop="32dp" />
 
