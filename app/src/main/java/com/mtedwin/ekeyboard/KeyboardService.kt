@@ -33,7 +33,7 @@ import kotlin.toString
 
 class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListener {
     companion object {
-        private const val MAX_INPUT_LENGTH = 5  // Maximum 5 inputs for Chinese/T13C
+        private const val MAX_INPUT_LENGTH = 5
     }
     private lateinit var keyboardView: NoDoubleTapKeyboardView
     private lateinit var keyboard: Keyboard
@@ -60,12 +60,12 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     private var isHandwriting: Boolean = false
     private var previousKeyboardName: String = "qwerty"
     private var chineseDictionary: Map<String, List<String>> = emptyMap()
-    private var chineseCharacterRank: Map<String, Int> = emptyMap() // Track frequency rank from CSV
+    private var chineseCharacterRank: Map<String, Int> = emptyMap()
     private var backspaceJob: Job? = null
     private var currentChinesePinyinLength = 0
     private var inputStartPosition: Int = -1
     private var keyLabelPopup: PopupWindow? = null
-    private var isCapsNext: Boolean = false // Track if next letter should be capitalized
+    private var isCapsNext: Boolean = false
     private var engFileObserver: FileObserver? = null
     private var chiFileObserver: FileObserver? = null
     private var drawingView: DrawingView? = null
@@ -155,31 +155,24 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
 
     private fun scheduleHandwritingAutoCommit() {
         if (!isHandwriting) return
+        val drawing = drawingView ?: return
+        if (drawing.isEmpty()) return
 
         val (mode, delayTenths) = readHandwritingAutoCommitSettings()
         abortHandwritingAutoCommit()
 
-        if (mode == "stop") {
-            if (drawingView?.isEmpty() == false) {
-                handwritingAutoCommitJob = serviceScope.launch {
-                    delay(200)
-                    if (isHandwriting && !drawingView?.isEmpty()!!) {
-                        recognizeAndCommitHandwriting()
-                    }
-                }
-            }
-            return
+        val idleDelayMs = when (mode) {
+            "delay" -> (delayTenths * 100L).coerceAtLeast(200L)
+            else -> 200L
         }
 
-        if (delayTenths <= 0) return
         handwritingAutoCommitJob = serviceScope.launch {
-            delay((delayTenths * 100L).coerceAtLeast(200L))
-            if (isHandwriting && !drawingView?.isEmpty()!!) {
+            delay(idleDelayMs)
+            if (isHandwriting && !drawing.isEmpty()) {
                 recognizeAndCommitHandwriting()
             }
         }
     }
-
     private fun recognizeAndCommitHandwriting() {
         val drawingViewRef = drawingView ?: return
         if (drawingViewRef.isEmpty()) return
@@ -199,7 +192,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             }
         }
     }
-
     private fun commitHandwritingText(text: String) {
         val ic = currentInputConnection
         if (ic == null) {
@@ -356,7 +348,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
         ViewCompat.requestApplyInsets(keyboardView)
         return rootView
     }
-
     private fun buildPrefixIndex(words: Set<String>): Map<String, List<String>> {
         val buckets = HashMap<String, MutableList<String>>()
         for (word in words) {
@@ -398,10 +389,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             e.printStackTrace()
         }
     }
-
     val currentKeyGroups = mutableListOf<String>()
-
-    // On key press, add the key label (e.g., "qw", "er", etc.)
     fun onT13KeyPress(keyLabel: String) {
         // For T13C mode, ignore inputs beyond MAX_INPUT_LENGTH
         if (isT13C && currentKeyGroups.size >= MAX_INPUT_LENGTH) {
@@ -413,20 +401,15 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             inputStartPosition = ic.getExtractedText(android.view.inputmethod.ExtractedTextRequest(), 0)?.selectionStart ?: 0
         }
 
-        // Add synchronously on Main thread — guaranteed before next onKey call
         currentKeyGroups.add(keyLabel)
         showKeyLabelPopup(getKeyGroupsDisplayString())
 
-
-        // Debounce only the expensive prediction update
         predictionJob?.cancel()
         predictionJob = serviceScope.launch {
             delay(50)
             updatePredictionBar()
         }
     }
-
-    // Generate all possible combinations (cartesian product)
     fun getCombinations(groups: List<String>, limit: Int = 200): List<String> {
         if (groups.isEmpty()) return emptyList()
         var current = listOf("")
@@ -445,16 +428,16 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
 
 
     // On backspace, remove last group
-    fun onBackspace() {
-        if (currentKeyGroups.isNotEmpty()) {
-            currentKeyGroups.removeAt(currentKeyGroups.size - 1)
-        }
-        predictionJob?.cancel()
-        predictionJob = serviceScope.launch {
-            delay(50)
-            updatePredictionBar()
-        }
-    }
+//    fun onBackspace() {
+//        if (currentKeyGroups.isNotEmpty()) {
+//            currentKeyGroups.removeAt(currentKeyGroups.size - 1)
+//        }
+//        predictionJob?.cancel()
+//        predictionJob = serviceScope.launch {
+//            delay(50)
+//            updatePredictionBar()
+//        }
+//    }
 
     private fun getKeyLabel(code: Int): String? {
         return when (code) {
@@ -475,8 +458,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             else -> null
         }
     }
-
-    // Get T13C Chinese radical label for display
     private fun getT13CLabel(code: Int): String? {
         return when (code) {
             113, 119 -> "手田"    // q or w
@@ -496,8 +477,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             else -> null
         }
     }
-
-    // Get single Chinese character radical for Chinese keyboard mode
     private fun getChineseLabel(code: Int): String? {
         return when (code) {
             113 -> "手"    // q
@@ -529,8 +508,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             else -> null
         }
     }
-
-    // Convert key groups to display string based on mode
     private fun getKeyGroupsDisplayString(): String {
         if (isT13C) {
             // For T13C, show Chinese radicals separated by commas
@@ -552,8 +529,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             return currentKeyGroups.toString()
         }
     }
-
-    // Update prediction bar and visibility
     private suspend fun updatePredictionBar() {
         if (isChinese && isQuickChi) {
             prediction4.visibility = View.VISIBLE
@@ -733,8 +708,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
         predictionBar.visibility = View.VISIBLE // Always show prediction bar for T13
 
     }
-
-    // Select a prediction
     private fun selectPrediction(word: String) {
         if (word.isEmpty()) return
         val ic = currentInputConnection ?: return
@@ -759,8 +732,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
 
         resetSequence()
     }
-
-    // Commit top prediction
     private fun commitTopPrediction(ic: android.view.inputmethod.InputConnection) {
         val predictions = (getCombinations(currentKeyGroups).filter { dictionary.contains(it) } +
                 dictionary.filter { word -> getCombinations(currentKeyGroups).any { combo -> word.startsWith(combo) } })
@@ -776,7 +747,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             ic.commitText(predictions[0], 1)
         }
     }
-
     private fun updateQuickChiKeyLabel() {
         if (!::keyboardView.isInitialized) return
         keyboard.keys.find { it.codes.contains(-7) }?.let { quickChiKey ->
@@ -784,7 +754,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             keyboardView.invalidateAllKeys()
         }
     }
-
     private fun getUserCycleOrder(): List<String> {
         val defaultOrder = listOf("qwerty", "t13", "chinese", "t13c", "symbol", "handwriting")
         val rawOrder = getSharedPreferences("KeyboardSettings", MODE_PRIVATE)
@@ -799,7 +768,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             .distinct()
             .ifEmpty { defaultOrder }
     }
-
     private fun applyKeyboardLayout(layoutName: String) {
         when (layoutName) {
             "qwerty" -> {
@@ -874,7 +842,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
         updateQuickChiKeyLabel()
         resetSequence()
     }
-
     private fun getCurrentKeyboardName(): String {
         return if (isHandwriting) {
             "handwriting"
@@ -887,12 +854,11 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
         }
     }
 
-    private fun handleBackspace() {
-        val ic = currentInputConnection ?: return
-        ic.deleteSurroundingText(1, 0)
-    }
+//    private fun handleBackspace() {
+//        val ic = currentInputConnection ?: return
+//        ic.deleteSurroundingText(1, 0)
+//    }
 
-    // Reset sequence
     private fun resetSequence() {
         currentKeyGroups.clear()
         if (isChinese || isT13C) {
@@ -912,6 +878,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             cancelBackspaceRepeat()
         }
     }
+
     override fun onKey(primaryCode: Int, keyCodes: IntArray?) {
         Log.d("KeyboardService", "onKey called: primaryCode=$primaryCode")
         val ic = currentInputConnection ?: return
@@ -1127,12 +1094,6 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             }
         }
     }
-    override fun onText(text: CharSequence?) {}
-    override fun swipeLeft() {}
-    override fun swipeRight() {}
-    override fun swipeDown() {}
-    override fun swipeUp() {}
-
     private fun showKeyLabelPopup(label: String) {
         val textView = TextView(this).apply {
             text = label
@@ -1154,7 +1115,7 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             Handler(Looper.getMainLooper()).postDelayed({ dismiss() }, 2000)
         }
     }
-    public fun reloadDictionaries() {
+    fun reloadDictionaries() {
         serviceScope.launch(Dispatchers.IO){
             try {
                 // Load English dictionary
@@ -1210,6 +1171,16 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
             }
         }
     }
+
+
+
+
+    override fun onText(text: CharSequence?) {}
+    override fun swipeLeft() {}
+    override fun swipeRight() {}
+    override fun swipeDown() {}
+    override fun swipeUp() {}
+
 
 }
 

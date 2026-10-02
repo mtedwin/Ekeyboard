@@ -207,7 +207,7 @@ class HomePage : Fragment() {
 
             item {
                 SettingsCard(title = "Handwriting Auto Commit") {
-                    val options = listOf("stop" to "Stop writing", "delay" to "After delay")
+                    val options = listOf("stop" to "Stop writing", "delay" to "After idle time")
                     options.forEach { (mode, label) ->
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -227,7 +227,7 @@ class HomePage : Fragment() {
                     if (handwritingAutoCommitMode == "delay") {
                         val delaySeconds = handwritingAutoCommitDelay / 10f
                         Text(
-                            text = "Delay: ${String.format("%.1f", delaySeconds)}s",
+                            text = "Idle after stop: ${String.format("%.1f", delaySeconds)}s",
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(top = 8.dp)
                         )
