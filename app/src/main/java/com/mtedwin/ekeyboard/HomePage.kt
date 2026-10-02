@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlin.math.roundToInt
 import androidx.fragment.app.Fragment
 
 class HomePage : Fragment() {
@@ -51,8 +53,8 @@ class HomePage : Fragment() {
     @Composable
     private fun HomePageContent() {
         val sharedPreferences = requireContext().getSharedPreferences("KeyboardSettings", Context.MODE_PRIVATE)
-        val defaultCycleOrder = listOf("qwerty", "t13", "chinese", "t13c")
-        val layoutOptions = listOf("qwerty", "t13", "chinese", "t13c")
+        val defaultCycleOrder = listOf("qwerty", "t13", "chinese", "t13c", "symbol", "handwriting")
+        val layoutOptions = listOf("qwerty", "t13", "chinese", "t13c", "symbol", "handwriting")
         val savedOrder = sharedPreferences.getString("keyboardCycleOrder", defaultCycleOrder.joinToString(","))
             ?: defaultCycleOrder.joinToString(",")
         val initialCycleText = savedOrder
@@ -65,6 +67,8 @@ class HomePage : Fragment() {
 
         var popupPosition by remember { mutableIntStateOf(sharedPreferences.getInt("popupPosition", -300)) }
         var autoSpace by remember { mutableStateOf(sharedPreferences.getBoolean("t13AutoSpace", false)) }
+        var handwritingAutoCommitMode by remember { mutableStateOf(sharedPreferences.getString("handwritingAutoCommitMode", "delay") ?: "delay") }
+        var handwritingAutoCommitDelay by remember { mutableIntStateOf(sharedPreferences.getInt("handwritingAutoCommitDelaySec", 10)) }
         var cycleOrderText by remember { mutableStateOf(initialCycleText) }
 
         fun saveCycleOrder(order: String) {
@@ -136,9 +140,9 @@ class HomePage : Fragment() {
                     ) {
                         layoutOptions.forEach { layout ->
                             val selected = layout in enabledLayouts
-                            Row(
+                            Column (
                                 modifier = Modifier.weight(1f),
-                                verticalAlignment = Alignment.CenterVertically
+//                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Checkbox(
                                     checked = selected,
@@ -175,7 +179,7 @@ class HomePage : Fragment() {
                                 saveCycleOrder(sanitized)
                             }
                         },
-                        label = { Text("Order: qwerty,t13,chinese,t13c") },
+                        label = { Text("Order: qwerty,t13,chinese,t13c,symbol,handwriting") },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -196,6 +200,47 @@ class HomePage : Fragment() {
                                 autoSpace = checked
                                 sharedPreferences.edit().putBoolean("t13AutoSpace", checked).apply()
                             }
+                        )
+                    }
+                }
+            }
+
+            item {
+                SettingsCard(title = "Handwriting Auto Commit") {
+                    val options = listOf("stop" to "Stop writing", "delay" to "After delay")
+                    options.forEach { (mode, label) ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
+                                selected = handwritingAutoCommitMode == mode,
+                                onClick = {
+                                    handwritingAutoCommitMode = mode
+                                    sharedPreferences.edit().putString("handwritingAutoCommitMode", mode).apply()
+                                }
+                            )
+                            Text(label)
+                        }
+                    }
+
+                    if (handwritingAutoCommitMode == "delay") {
+                        val delaySeconds = handwritingAutoCommitDelay / 10f
+                        Text(
+                            text = "Delay: ${String.format("%.1f", delaySeconds)}s",
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                        Slider(
+                            value = handwritingAutoCommitDelay.toFloat(),
+                            onValueChange = {
+                                val value = it.roundToInt().coerceIn(2, 20)
+                                handwritingAutoCommitDelay = value
+                                sharedPreferences.edit().putInt("handwritingAutoCommitDelaySec", value).apply()
+                            },
+                            valueRange = 2f..20f,
+                            steps = 17,
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 }

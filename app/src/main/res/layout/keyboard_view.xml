@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <!-- Top Prediction Bar -->
     <HorizontalScrollView
         android:id="@+id/prediction_scroll"
         android:layout_width="match_parent"
@@ -11,111 +12,170 @@
         android:fillViewport="true"
         android:scrollbars="none">
 
-    <LinearLayout
-        android:id="@+id/prediction_bar"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:orientation="horizontal"
-        android:background="#DDDDDD"
-        android:visibility="gone">  <!-- Initially hidden -->
+        <LinearLayout
+            android:id="@+id/prediction_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:background="#DDDDDD"
+            android:visibility="gone">
 
-        <TextView android:id="@+id/prediction1"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"/>
-        <TextView android:id="@+id/prediction2"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"/>
-        <TextView android:id="@+id/prediction3"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"/>
-        <TextView android:id="@+id/prediction4"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"
-            android:visibility="gone"/>
-        <TextView android:id="@+id/prediction5"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"
-            android:visibility="gone"/>
-        <TextView android:id="@+id/prediction6"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"
-            android:visibility="gone"/>
-        <TextView android:id="@+id/prediction7"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"
-            android:visibility="gone"/>
-        <TextView android:id="@+id/prediction8"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"
-            android:visibility="gone"/>
-        <TextView android:id="@+id/prediction9"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"
-            android:visibility="gone"/>
-        <TextView android:id="@+id/prediction10"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center" android:textSize="16sp"
-            android:clickable="true" android:focusable="true"
-            android:paddingLeft="12dp" android:paddingRight="12dp"
-            android:minWidth="60dp"
-            android:maxWidth="200dp"
-            android:visibility="gone"/>
-
-
-    </LinearLayout>
-
+            <TextView android:id="@+id/prediction1"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"/>
+            <TextView android:id="@+id/prediction2"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"/>
+            <TextView android:id="@+id/prediction3"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"/>
+            <TextView android:id="@+id/prediction4"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"
+                android:visibility="gone"/>
+            <TextView android:id="@+id/prediction5"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"
+                android:visibility="gone"/>
+            <TextView android:id="@+id/prediction6"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"
+                android:visibility="gone"/>
+            <TextView android:id="@+id/prediction7"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"
+                android:visibility="gone"/>
+            <TextView android:id="@+id/prediction8"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"
+                android:visibility="gone"/>
+            <TextView android:id="@+id/prediction9"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"
+                android:visibility="gone"/>
+            <TextView android:id="@+id/prediction10"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center" android:textSize="16sp"
+                android:clickable="true" android:focusable="true"
+                android:paddingLeft="12dp" android:paddingRight="12dp"
+                android:minWidth="60dp" android:maxWidth="200dp"
+                android:visibility="gone"/>
+        </LinearLayout>
     </HorizontalScrollView>
 
-
-
-    <com.mtedwin.ekeyboard.NoDoubleTapKeyboardView
-        android:id="@+id/keyboard_view"
+    <!-- Main Content Container -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content">
+
+        <!-- Keyboard view sits in the layout background -->
+        <com.mtedwin.ekeyboard.NoDoubleTapKeyboardView
+            android:id="@+id/keyboard_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Handwriting pad overlays the top portion of the keyboard view, leaving bottom nav visible -->
+        <FrameLayout
+            android:id="@+id/handwriting_container"
+            android:layout_width="match_parent"
+            android:layout_height="420dp"
+            android:layout_gravity="top"
+            android:visibility="gone"
+            android:background="#FFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:padding="8dp"
+                    android:gravity="top|center">
+                    <Button
+                        android:id="@+id/close_drawing_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Close" />
+
+                    <Button
+                        android:id="@+id/clear_drawing_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Clear"
+                        android:layout_marginStart="8dp" />
+                    <Button
+                        android:id="@+id/handle_write_delete_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Del"
+                        android:layout_marginStart="8dp" />
+                    <Button
+                        android:id="@+id/commit_drawing_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Commit"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+
+
+<!--                <TextView-->
+<!--                    android:id="@+id/recognized_text_view"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:padding="8dp"-->
+<!--                    android:text="候選："-->
+<!--                    android:textSize="18sp"-->
+<!--                    android:textStyle="bold"-->
+<!--                    android:gravity="center" />-->
+
+                <com.mtedwin.ekeyboard.DrawingView
+                    android:id="@+id/drawing_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+
+            </LinearLayout>
+        </FrameLayout>
+    </FrameLayout>
 </LinearLayout>

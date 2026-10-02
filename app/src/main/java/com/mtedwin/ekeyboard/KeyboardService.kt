@@ -57,6 +57,8 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     private var isQuickChi : Boolean = true
     private var isT13C: Boolean = false
     private var isSymbol: Boolean = false
+    private var isHandwriting: Boolean = false
+    private var previousKeyboardName: String = "qwerty"
     private var chineseDictionary: Map<String, List<String>> = emptyMap()
     private var chineseCharacterRank: Map<String, Int> = emptyMap() // Track frequency rank from CSV
     private var backspaceJob: Job? = null
@@ -66,6 +68,15 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     private var isCapsNext: Boolean = false // Track if next letter should be capitalized
     private var engFileObserver: FileObserver? = null
     private var chiFileObserver: FileObserver? = null
+    private var drawingView: DrawingView? = null
+    private var handwritingContainer: View? = null
+    private var recognizedTextView: TextView? = null
+    private var closeDrawingButton: android.widget.Button? = null
+    private var clearDrawingButton: android.widget.Button? = null
+    private var commitDrawingButton: android.widget.Button? = null
+    private var handwritingAutoCommitJob: Job? = null
+
+    private var handleWriteDeleteButton : android.widget.Button? = null
 
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate() {
@@ -100,11 +111,113 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     }
 
     override fun onDestroy() {
-
+        cancelBackspaceRepeat()
+        abortHandwritingAutoCommit()
         engFileObserver?.stopWatching()
         chiFileObserver?.stopWatching()
 //        unregisterReceiver(reloadReceiver)
         super.onDestroy()
+    }
+
+    private fun cancelBackspaceRepeat() {
+        backspaceJob?.cancel()
+        backspaceJob = null
+    }
+
+    private fun toggleHandwriting(show: Boolean) {
+        isHandwriting = show
+        handwritingContainer?.visibility = if (show) View.VISIBLE else View.GONE
+        keyboardView.visibility = View.VISIBLE
+
+        if (show) {
+            keyboard = Keyboard(this, R.xml.handwriting)
+            keyboardView.keyboard = keyboard
+            keyboardView.bypassTouchHandling = true
+            keyboardView.invalidateAllKeys()
+            return
+        }
+
+        val restoreLayout = previousKeyboardName.ifEmpty { "qwerty" }
+        applyKeyboardLayout(restoreLayout)
+    }
+
+    private fun readHandwritingAutoCommitSettings(): Pair<String, Int> {
+        val sharedPreferences = getSharedPreferences("KeyboardSettings", MODE_PRIVATE)
+        val mode = sharedPreferences.getString("handwritingAutoCommitMode", "stop") ?: "stop"
+        val delayTenthSeconds = sharedPreferences.getInt("handwritingAutoCommitDelaySec", 10)
+        return Pair(mode, delayTenthSeconds)
+    }
+
+    private fun abortHandwritingAutoCommit() {
+        handwritingAutoCommitJob?.cancel()
+        handwritingAutoCommitJob = null
+    }
+
+    private fun scheduleHandwritingAutoCommit() {
+        if (!isHandwriting) return
+
+        val (mode, delayTenths) = readHandwritingAutoCommitSettings()
+        abortHandwritingAutoCommit()
+
+        if (mode == "stop") {
+            if (drawingView?.isEmpty() == false) {
+                handwritingAutoCommitJob = serviceScope.launch {
+                    delay(200)
+                    if (isHandwriting && !drawingView?.isEmpty()!!) {
+                        recognizeAndCommitHandwriting()
+                    }
+                }
+            }
+            return
+        }
+
+        if (delayTenths <= 0) return
+        handwritingAutoCommitJob = serviceScope.launch {
+            delay((delayTenths * 100L).coerceAtLeast(200L))
+            if (isHandwriting && !drawingView?.isEmpty()!!) {
+                recognizeAndCommitHandwriting()
+            }
+        }
+    }
+
+    private fun recognizeAndCommitHandwriting() {
+        val drawingViewRef = drawingView ?: return
+        if (drawingViewRef.isEmpty()) return
+
+        recognizedTextView?.text = "候選：識別中..."
+        serviceScope.launch(Dispatchers.IO) {
+            val recognized = drawingViewRef.recognize()
+            withContext(Dispatchers.Main) {
+                val candidate = recognized.ifEmpty { "" }
+                recognizedTextView?.text = if (candidate.isEmpty()) "候選：" else "候選：$candidate"
+                if (candidate.isEmpty()) {
+                    drawingViewRef.clear()
+                    recognizedTextView?.text = "候選："
+                    return@withContext
+                }
+                commitHandwritingText(candidate)
+            }
+        }
+    }
+
+    private fun commitHandwritingText(text: String) {
+        val ic = currentInputConnection
+        if (ic == null) {
+            Log.w(TAG, "Handwriting commit skipped: currentInputConnection is null")
+            return
+        }
+
+        try {
+            ic.finishComposingText()
+            ic.commitText(text, 1)
+            Log.d(TAG, "Handwriting commitText succeeded: $text")
+        } catch (e: Exception) {
+            Log.e(TAG, "Handwriting commit failed", e)
+            return
+        }
+
+        drawingView?.clear()
+        recognizedTextView?.text = "候選："
     }
 
     override fun onCreateInputView(): View {
@@ -124,13 +237,56 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
         keyboardView.isPreviewEnabled = false
         keyboardView.bypassTouchHandling = isT13 || isT13C
 
+        handwritingContainer = rootView.findViewById(R.id.handwriting_container)
+        drawingView = rootView.findViewById(R.id.drawing_view)
+        //recognizedTextView = rootView.findViewById(R.id.recognized_text_view)
+        closeDrawingButton = rootView.findViewById(R.id.close_drawing_button)
+        clearDrawingButton = rootView.findViewById(R.id.clear_drawing_button)
+        commitDrawingButton = rootView.findViewById(R.id.commit_drawing_button)
+        handleWriteDeleteButton = rootView.findViewById(R.id.handle_write_delete_button)
+
+        drawingView?.onStrokeFinished = {
+            if (isHandwriting) {
+                scheduleHandwritingAutoCommit()
+            }
+        }
+
+        closeDrawingButton?.setOnClickListener {
+            abortHandwritingAutoCommit()
+            drawingView?.clear()
+            recognizedTextView?.text = "候選："
+            toggleHandwriting(false)
+        }
+
+        clearDrawingButton?.setOnClickListener {
+            abortHandwritingAutoCommit()
+            drawingView?.clear()
+            recognizedTextView?.text = "候選："
+        }
+
+        commitDrawingButton?.setOnClickListener {
+            abortHandwritingAutoCommit()
+            recognizeAndCommitHandwriting()
+        }
+
+        handleWriteDeleteButton?.setOnClickListener {
+
+            if (isHandwriting) {
+                // If in handwriting mode, treat as delete
+                currentInputConnection?.deleteSurroundingText(1, 0)
+            } else {
+                // If not in handwriting mode, switch to handwriting mode
+                toggleHandwriting(true)
+            }
+        }
+
         keyboardView.onKeyLongPressListener =
             object : NoDoubleTapKeyboardView.OnKeyLongPressListener {
                 override fun onKeyLongPressed(key: Keyboard.Key) {
                     Log.d(TAG, "Long press---on key: ${key.codes[0]}")
                     when (key.codes[0]) {
                         -5 -> { // Backspace
-                            backspaceJob?.cancel()
+                            cancelBackspaceRepeat()
                             backspaceJob = serviceScope.launch {
                                 while (isActive) {
                                     if (currentKeyGroups.isNotEmpty()) {
@@ -146,24 +302,17 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
                                     } else {
                                         currentInputConnection?.deleteSurroundingText(1, 0)
                                     }
-                                    delay(100) // Adjust speed (lower = faster)
+                                    delay(100)
                                 }
                             }
                         }
-
-
                     }
-                    // Do something on long press, e.g.:
-                    // when (key.codes[0]) { ... }
                 }
 
                 override fun onKeyReleased(primaryCode: Int) {
                     Log.d(TAG, "Long press---on key: canceled for key is calling: $primaryCode")
-
                     if (primaryCode == -5) {
-                        Log.d(TAG, "Long press---on key: canceled for key: $primaryCode")
-                        backspaceJob?.cancel()
-                        backspaceJob = null
+                        cancelBackspaceRepeat()
                     }
                 }
             }
@@ -637,12 +786,12 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     }
 
     private fun getUserCycleOrder(): List<String> {
-        val defaultOrder = listOf("qwerty", "t13", "chinese", "t13c")
+        val defaultOrder = listOf("qwerty", "t13", "chinese", "t13c", "symbol", "handwriting")
         val rawOrder = getSharedPreferences("KeyboardSettings", MODE_PRIVATE)
             .getString("keyboardCycleOrder", defaultOrder.joinToString(","))
             ?: defaultOrder.joinToString(",")
 
-        val allowed = setOf("qwerty", "t13", "chinese", "t13c")
+        val allowed = setOf("qwerty", "t13", "chinese", "t13c", "symbol", "handwriting")
         return rawOrder
             .split(",")
             .map { it.trim().lowercase() }
@@ -654,32 +803,68 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     private fun applyKeyboardLayout(layoutName: String) {
         when (layoutName) {
             "qwerty" -> {
+                isHandwriting = false
+                previousKeyboardName = "qwerty"
                 keyboard = Keyboard(this, R.xml.qwerty)
                 isT13 = false
                 isChinese = false
                 isT13C = false
                 isSymbol = false
+                keyboardView.visibility = View.VISIBLE
+                handwritingContainer?.visibility = View.GONE
             }
             "t13" -> {
+                isHandwriting = false
+                previousKeyboardName = "t13"
                 keyboard = Keyboard(this, R.xml.t13)
                 isT13 = true
                 isChinese = false
                 isT13C = false
                 isSymbol = false
+                keyboardView.visibility = View.VISIBLE
+                handwritingContainer?.visibility = View.GONE
             }
             "chinese" -> {
+                isHandwriting = false
+                previousKeyboardName = "chinese"
                 keyboard = Keyboard(this, R.xml.chinese_full)
                 isChinese = true
                 isT13 = false
                 isT13C = false
                 isSymbol = false
+                keyboardView.visibility = View.VISIBLE
+                handwritingContainer?.visibility = View.GONE
             }
             "t13c" -> {
+                isHandwriting = false
+                previousKeyboardName = "t13c"
                 keyboard = Keyboard(this, R.xml.t13c)
                 isT13C = true
                 isT13 = false
                 isChinese = false
                 isSymbol = false
+                keyboardView.visibility = View.VISIBLE
+                handwritingContainer?.visibility = View.GONE
+            }
+            "symbol" -> {
+                isHandwriting = false
+                previousKeyboardName = "symbol"
+                keyboard = Keyboard(this, R.xml.symbol)
+                isSymbol = true
+                isT13 = false
+                isT13C = false
+                isChinese = false
+                keyboardView.visibility = View.VISIBLE
+                handwritingContainer?.visibility = View.GONE
+            }
+            "handwriting" -> {
+                previousKeyboardName = getCurrentKeyboardName().takeIf { it != "handwriting" } ?: previousKeyboardName
+                keyboard = Keyboard(this, R.xml.handwriting)
+                isT13 = false
+                isChinese = false
+                isT13C = false
+                isSymbol = false
+                toggleHandwriting(true)
             }
             else -> return
         }
@@ -691,7 +876,9 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     }
 
     private fun getCurrentKeyboardName(): String {
-        return when {
+        return if (isHandwriting) {
+            "handwriting"
+        } else when {
             isT13 -> "t13"
             isChinese -> "chinese"
             isT13C -> "t13c"
@@ -721,6 +908,9 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
     override fun onPress(primaryCode: Int) {
     }
     override fun onRelease(primaryCode: Int) {
+        if (primaryCode == -5) {
+            cancelBackspaceRepeat()
+        }
     }
     override fun onKey(primaryCode: Int, keyCodes: IntArray?) {
         Log.d("KeyboardService", "onKey called: primaryCode=$primaryCode")
@@ -876,11 +1066,19 @@ class KeyboardService : InputMethodService(), KeyboardView.OnKeyboardActionListe
                 resetSequence()
             }
             -106 -> { // Cycle through user-selected app keyboards in the configured order
+                if (isHandwriting) {
+                    toggleHandwriting(false)
+                    return
+                }
                 val cycleOrder = getUserCycleOrder()
                 val currentName = getCurrentKeyboardName()
                 val currentIndex = cycleOrder.indexOf(currentName)
                 val nextIndex = if (currentIndex >= 0) (currentIndex + 1) % cycleOrder.size else 0
                 applyKeyboardLayout(cycleOrder[nextIndex])
+            }
+            -107 -> { // Toggle handwriting pad
+                previousKeyboardName = getCurrentKeyboardName().takeIf { it != "handwriting" } ?: previousKeyboardName
+                toggleHandwriting(true)
             }
             else -> {
                 if (isT13) {

@@ -55,6 +55,11 @@ class MainActivity : AppCompatActivity() {
             WindowInsetsCompat.CONSUMED
         }
 
+        // If the keyboard is opened in handwriting mode, hide the bottom nav at the app layer.
+        // The IME does not directly expose the handwriting pad to MainActivity, so this works
+        // as a fallback when the app is hosting a handwriting panel in the foreground.
+        bottomNavigationView.visibility = View.GONE
+
         bottomNavigationView.setupWithNavController(navController)
     }
 

@@ -54,6 +54,15 @@ class NoDoubleTapKeyboardView constructor(
 
     private var activeLongPressCode: Int? = null
 
+    private fun cancelLongPressState() {
+        longPressJob?.cancel()
+        longPressJob = null
+        activeLongPressCode?.let { code ->
+            onKeyLongPressListener?.onKeyReleased(code)
+        }
+        activeLongPressCode = null
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!bypassTouchHandling) {
             return super.onTouchEvent(event)
@@ -61,6 +70,7 @@ class NoDoubleTapKeyboardView constructor(
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
+                cancelLongPressState()
                 activeLongPressCode = null
                 val keyIndex = getKeyIndexAt(event.x.toInt(), event.y.toInt())
                 downKeyIndex = keyIndex
@@ -73,7 +83,7 @@ class NoDoubleTapKeyboardView constructor(
                         delay(longPressTimeout)
                         if (isActive && downKeyIndex == keyIndex) {
                             keyboard?.keys?.get(keyIndex)?.let { key ->
-                                activeLongPressCode = key.codes[0] // Track key code for long-press
+                                activeLongPressCode = key.codes[0]
                                 onLongPress(key)
                             }
                         }
@@ -85,28 +95,15 @@ class NoDoubleTapKeyboardView constructor(
             MotionEvent.ACTION_MOVE -> {
                 val keyIndex = getKeyIndexAt(event.x.toInt(), event.y.toInt())
                 if (keyIndex != downKeyIndex) {
-                    // Release active long-press if finger slides to another key
-                    activeLongPressCode?.let { code ->
-                        onKeyLongPressListener?.onKeyReleased(code)
-                        activeLongPressCode = null
-                    }
-                    longPressJob?.cancel()
-                    longPressJob = null
+                    cancelLongPressState()
                     downKeyIndex = keyIndex
                 }
                 return true
             }
 
             MotionEvent.ACTION_UP -> {
-                longPressJob?.cancel()
-                longPressJob = null
-
                 val wasLongPressed = activeLongPressCode != null
-                // Release active long-press state when finger lifts up
-                activeLongPressCode?.let { code ->
-                    onKeyLongPressListener?.onKeyReleased(code)
-                    activeLongPressCode = null
-                }
+                cancelLongPressState()
 
                 val keyIndex = downKeyIndex
                 downKeyIndex = -1
@@ -128,14 +125,7 @@ class NoDoubleTapKeyboardView constructor(
             }
 
             MotionEvent.ACTION_CANCEL -> {
-                longPressJob?.cancel()
-                longPressJob = null
-
-                activeLongPressCode?.let { code ->
-                    onKeyLongPressListener?.onKeyReleased(code)
-                    activeLongPressCode = null
-                }
-
+                cancelLongPressState()
                 downKeyIndex = -1
                 return true
             }
